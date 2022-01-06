@@ -22,7 +22,6 @@ def main():
     pr = PullRequest(head_owner=args.owner, head=args.head, head_token=args.token,
                      base_owner=args.owner, repo=args.repo, base=args.base, base_token=args.token)
     try:
-        number = None
         if exist := pr.get_open():
             number = exist[0].get('number')
             sha = exist[0].get('head').get('sha')
