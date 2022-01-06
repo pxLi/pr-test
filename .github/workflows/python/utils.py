@@ -12,20 +12,44 @@ class PullRequest:
     """Pull Request class"""
 
     def __init__(self,
-                 head_owner, head_repo, head, head_token,
-                 base_owner, base_repo, base, base_token):
+                 head_owner, head, head_token,
+                 base_owner, repo, base, base_token):
         self.head_owner = head_owner
-        self.head_repo = head_repo
         self.head = head
         self.base_owner = base_owner
-        self.base_repo = base_repo
+        self.base_repo = repo
         self.base = base
         self.pulls_url = f'{API_URL}/repos/{self.base_owner}/{self.base_repo}/pulls'
-        self._head_auth_headers = {'Authorization': 'token ' + head_token}
-        self._base_auth_headers = {'Authorization': 'token ' + base_token}
+        self._head_auth_headers = {
+            'Accept': 'application/vnd.github.v3+json',
+            'Authorization': f"token {head_token}"
+        }
+        self._base_auth_headers = {
+            'Accept': 'application/vnd.github.v3+json',
+            'Authorization': f"token {base_token}"
+        }
+
+    def get_open(self):
+        """get open pull request if existed"""
+        params = {
+            'state': 'open',
+            'head': f"{self.head_owner}:{self.head}",
+            'base': self.base,
+        }
+        print(params)
+        r = requests.get(self.pulls_url, headers=self._base_auth_headers, params=params)
+        if r.status_code == 200:
+            return r.json()
+        if r.status_code == 304:
+            return None
+        # FAILURE
+        print('FAILURE - list PR')
+        print(f'status code: {r.status_code}')
+        raise Exception(f"Failed to create PR: {r.json()}")
 
     def create(self, params):
         """create a pull request"""
+        # the token here must have write access to head owner/repo
         r = requests.post(self.pulls_url, headers=self._head_auth_headers, json=params)
         if r.status_code == 201:
             print('SUCCESS - create PR')
@@ -40,17 +64,14 @@ class PullRequest:
         # FAILURE
         print('FAILURE - create PR')
         print(f'status code: {r.status_code}')
-        print(r.json())
-        sys.exit(1)
+        raise Exception(f"Failed to create PR: {r.json()}")
 
     def create_auto_merge(self):
         """create an auto-merge pull request"""
         params = {
             # head share the same owner/repo with base in auto-merge
             'title': f'[auto-merge] {self.head} to {self.base} [skip ci] [bot]',
-            'owner': self.head_owner,
-            'repo': self.head_repo,
-            'head': self.head,
+            'head': f"{self.head_owner}:{self.head}",
             'base': self.base,
             'body': f'auto-merge triggered by github actions on `{self.head}` to create a PR keeping `{self.base}` up-to-date. If '
                     'this PR is unable to be merged due to conflicts, it will remain open until manually fix.',
@@ -60,6 +81,7 @@ class PullRequest:
 
     def merge(self, number, params):
         """merge a pull request"""
+        # the token here must have write access to base owner/repo
         url = f'{self.pulls_url}/{number}/merge'
         return requests.put(url, headers=self._head_auth_headers, json=params)
 
@@ -73,7 +95,7 @@ class PullRequest:
         if r.status_code == 200:
             self.comment(number, '**SUCCESS** - auto-merge')
             print('SUCCESS - auto-merge')
-            sys.exit(0)
+            return
         else:
             print('FAILURE - auto-merge')
             self.comment(number=number, content=f"""**FAILURE** - Unable to auto-merge. Manual operation is required.
@@ -97,8 +119,7 @@ git push <personal fork> fix-auto-merge-conflict-{number}
 Once this PR is merged, the auto-merge PR should automatically be closed since it contains the same commit hashes
 """)
             print(f'status code: {r.status_code}')
-            print(r.json())
-            sys.exit(1)
+            raise Exception(f"Failed to auto-merge PR: {r.json()}")
 
     def comment(self, number, content):
         """comment in a pull request"""

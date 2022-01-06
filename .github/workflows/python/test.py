@@ -19,13 +19,22 @@ def main():
                         help="github token, will try use env AUTOMERGE_TOKEN if empty")
     args = parser.parse_args()
 
-    pr = PullRequest(head_owner=args.owner, head_repo=args.repo, head=args.head, head_token=args.token,
-                     base_owner=args.owner, base_repo=args.repo, base=args.base, base_token=args.token)
-
-    number, sha, term = pr.create_auto_merge()
-    if term:
-        sys.exit(0)
-    # pr.auto_merge(number, sha)
+    pr = PullRequest(head_owner=args.owner, head=args.head, head_token=args.token,
+                     base_owner=args.owner, repo=args.repo, base=args.base, base_token=args.token)
+    try:
+        number = None
+        if exist := pr.get_open():
+            number = exist[0].get('number')
+            sha = exist[0].get('head').get('sha')
+        else:
+            number, sha, term = pr.create_auto_merge()
+            if term:
+                sys.exit(0)
+        print(number, sha)
+        pr.auto_merge(number, sha)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
