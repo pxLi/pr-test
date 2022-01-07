@@ -22,7 +22,7 @@ env:
 on:
   pull_request_target:
     branches:
-    - ${ HEAD }
+    - ${{ env.HEAD }}
     types: [closed]
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${ HEAD } # force to fetch from latest upstream instead of PR ref
+          ref: ${{ env.HEAD }} # force to fetch from latest upstream instead of PR ref
 
       - name: auto-merge job
         uses: ./.github/workflows/auto-merge
