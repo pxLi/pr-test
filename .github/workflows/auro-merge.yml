@@ -35,7 +35,6 @@ jobs:
         with:
           ref: ${{ env.HEAD }} # force to fetch from latest upstream instead of PR ref
 
-      # deal w/ potential submodule update conflict
       - name: push intermediate branch for auto-merge
         run: |
           git config user.name "GitHub Actions Bot"
@@ -43,8 +42,8 @@ jobs:
           git fetch origin ${HEAD} ${BASE}
           git checkout -b auto-merge-${HEAD} origin/${HEAD}
           OUT=$(git --no-pager diff --name-only origin/${BASE} | grep README.md || true)
-          [[ ! -z "${OUT}" ]] && git checkout ${BASE} -- README.md && git commit -s -am "auto-merge use submodule in BASE ref"
-          git push auto-merge-${HEAD} -f
+          [[ ! -z "${OUT}" ]] && git checkout origin/${BASE} -- README.md && git commit -s -am "auto-merge use submodule in BASE ref"
+          git push origin auto-merge-${HEAD} -f
 
       - name: auto-merge job
         uses: ./.github/workflows/action-helper
