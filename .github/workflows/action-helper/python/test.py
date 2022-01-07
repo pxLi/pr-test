@@ -15,8 +15,8 @@ def main():
                         help="HEAD ref, will try use env HEAD if empty")
     parser.add_argument("--base", action=EnvDefault, env="BASE",
                         help="Base ref, will try use env BASE if empty")
-    parser.add_argument("--token", action=EnvDefault, env="AUTOMERGE_TOKEN",
-                        help="github token, will try use env AUTOMERGE_TOKEN if empty")
+    parser.add_argument("--token", action=EnvDefault, env="TOKEN",
+                        help="github token, will try use env TOKEN if empty")
     args = parser.parse_args()
 
     pr = PullRequest(head_owner=args.owner, head=args.head, head_token=args.token,

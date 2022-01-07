@@ -42,4 +42,4 @@ jobs:
         env:
           OWNER: NVIDIA
           REPO: spark-rapids
-          AUTOMERGE_TOKEN: ${{ secrets.AUTOMERGE_TOKEN }}
+          TOKEN: ${{ secrets.AUTOMERGE_TOKEN }}
