@@ -15,8 +15,9 @@
 FROM python:alpine
 
 WORKDIR /
-COPY python entrypoint.sh ./
-RUN chmod -R +x python/ entrypoint.sh
+COPY python /python
+COPY entrypoint.sh .
+RUN chmod -R +x /python /entrypoint.sh
 RUN pip install requests
 
 ENTRYPOINT ["/python/entrypoint.sh"]
