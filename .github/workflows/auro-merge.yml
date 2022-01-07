@@ -46,10 +46,12 @@ jobs:
           git push ${HEAD}-auto-merge -f
 
       - name: auto-merge job
-        uses: ./.github/workflows/auto-merge
+        uses: ./.github/workflows/action-helper
+        with:
+          operator: auto-merge
         env:
-          OWNER: NVIDIA
-          REPO: spark-rapids
+          OWNER: pxLi
+          REPO: pr-test
           HEAD: ${{ env.HEAD }}-auto-merge
           BASE: ${{ env.BASE }}
           TOKEN: ${{ secrets.AUTOMERGE_TOKEN }}
