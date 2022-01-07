@@ -1,4 +1,6 @@
-# Copyright (c) 2022, NVIDIA CORPORATION.
+#!/bin/bash
+#
+# Copyright (c) 2022, NVIDIA CORPORATION. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,9 +13,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-name: 'auto-merge action'
-description: 'auto-merge HEAD to BASE'
-runs:
-  using: 'docker'
-  image: '../python/Dockerfile.auto-merge'
+set -e
+
+if [[ $# -ne 1 ]]; then
+    echo "ERROR: invalid number of parameters, should be exact one"
+    exit 1
+fi
+
+case $1 in
+
+    auto-merge)
+        ./python/auto-merge
+        ;;
+
+    *)
+        echo "ERROR: unknown parameter: $1"
+        ;;
+esac

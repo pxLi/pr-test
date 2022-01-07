@@ -36,7 +36,9 @@ jobs:
           ref: ${{ env.HEAD }} # force to fetch from latest upstream instead of PR ref
 
       - name: auto-merge job
-        uses: ./.github/workflows/auto-merge
+        uses: ./.github/workflows/action-helper
+        with:
+          operator: auto-merge
         env:
           OWNER: NVIDIA
           REPO: spark-rapids

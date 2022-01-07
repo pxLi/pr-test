@@ -15,8 +15,8 @@
 FROM python:alpine
 
 WORKDIR /
-COPY automerge utils.py .
-RUN pip install requests && chmod +x /automerge
+COPY python entrypoint.sh ./
+RUN chmod -R +x python/ entrypoint.sh
+RUN pip install requests
 
-# require envs: OWNER,REPO_NAME,HEAD,BASE,GITHUB_TOKEN
-ENTRYPOINT ["/automerge"]
+ENTRYPOINT ["/python/entrypoint.sh"]
