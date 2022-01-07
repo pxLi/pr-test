@@ -16,4 +16,4 @@ name: 'auto-merge action'
 description: 'auto-merge HEAD to BASE'
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: '../python/Dockerfile.auto-merge'
