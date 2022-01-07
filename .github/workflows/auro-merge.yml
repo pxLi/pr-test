@@ -22,7 +22,7 @@ env:
 on:
   pull_request_target:
     branches:
-    - ${{ env.HEAD }}
+    - branch-22.02
     types: [closed]
 
 jobs:
