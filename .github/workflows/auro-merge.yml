@@ -42,8 +42,8 @@ jobs:
           git config user.email "abc@cba.com"
           git fetch origin ${HEAD} ${BASE}
           git checkout -b ${HEAD}-auto-merge origin/${HEAD}
-          git diff --name-only origin/${BASE} | grep README.txt
-          [[ $? -eq 0 ]] && git checkout ${BASE} — README.txt && git commit -s -am "auto-merge use submodule in BASE ref"
+          OUT=$(git --no-pager diff --name-only origin/${BASE} | grep README.md || true)
+          [[ ! -z "${OUT}" ]] && git checkout ${BASE} -- README.md && git commit -s -am "auto-merge use submodule in BASE ref"
           git push ${HEAD}-auto-merge -f
 
       - name: auto-merge job
