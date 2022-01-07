@@ -41,7 +41,7 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "abc@cba.com"
           git fetch origin ${HEAD} ${BASE}
-          git checkout ${HEAD}-auto-merge origin/${HEAD}
+          git checkout -b ${HEAD}-auto-merge origin/${HEAD}
           git diff --name-only origin/${BASE} | grep README.txt
           [[ $? -eq 0 ]] && git checkout ${BASE} — README.txt && git commit -s -am "auto-merge use submodule in BASE ref"
           git push ${HEAD}-auto-merge -f
