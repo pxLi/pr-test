@@ -21,10 +21,11 @@ on:
     - branch-22.02
     types: [closed]
 
-jobs:
-  env:
+env:
     HEAD: branch-22.02
     BASE: branch-22.04
+
+jobs:
   auto-merge:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
