@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh -l
 #
 # Copyright (c) 2022, NVIDIA CORPORATION. All rights reserved.
 #
@@ -25,7 +25,7 @@ fi
 case $1 in
 
     auto-merge)
-        ./python/auto-merge
+        /python/auto-merge
         ;;
 
     *)
