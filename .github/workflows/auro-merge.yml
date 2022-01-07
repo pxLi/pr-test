@@ -21,10 +21,11 @@ on:
     - branch-22.02
     types: [closed]
 
-jobs:
-  env:
+env:
     HEAD: branch-22.02
     BASE: branch-22.04
+
+jobs:
   auto-merge:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
@@ -34,22 +35,23 @@ jobs:
         with:
           ref: ${{ env.HEAD }} # force to fetch from latest upstream instead of PR ref
 
-      # deal w/ potential submodule update conflict
       - name: push intermediate branch for auto-merge
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "abc@cba.com"
           git fetch origin ${HEAD} ${BASE}
-          git checkout ${HEAD}-auto-merge origin/${HEAD}
-          git diff --name-only origin/${BASE} | grep README.txt
-          [[ $? -eq 0 ]] && git checkout ${BASE} — README.txt && git commit -s -am "auto-merge use submodule in BASE ref"
-          git push ${HEAD}-auto-merge -f
+          git checkout -b auto-merge-${HEAD} origin/${HEAD}
+          OUT=$(git --no-pager diff --name-only origin/${BASE} | grep README.md || true)
+          [[ ! -z "${OUT}" ]] && git checkout origin/${BASE} -- README.md && git commit -s -am "auto-merge use submodule in BASE ref"
+          git push origin auto-merge-${HEAD} -f
 
       - name: auto-merge job
-        uses: ./.github/workflows/auto-merge
+        uses: ./.github/workflows/action-helper
+        with:
+          operator: auto-merge
         env:
-          OWNER: NVIDIA
-          REPO: spark-rapids
-          HEAD: ${{ env.HEAD }}-auto-merge
+          OWNER: pxLi
+          REPO: pr-test
+          HEAD: auto-merge-${{ env.HEAD }}
           BASE: ${{ env.BASE }}
           TOKEN: ${{ secrets.AUTOMERGE_TOKEN }}
