@@ -40,10 +40,14 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "abc@cba.com"
           git fetch origin ${HEAD} ${BASE}
-          git checkout -b auto-merge-${HEAD} origin/${HEAD}
-          OUT=$(git --no-pager diff --name-only origin/${BASE} | grep README.md || true)
-          [[ ! -z "${OUT}" ]] && git checkout origin/${BASE} -- README.md && git commit -s -am "auto-merge use submodule in BASE ref"
-          git push origin auto-merge-${HEAD} -f
+          git checkout -b ${INTERMEDIATE_HEAD} origin/${HEAD}
+          OUT=$(git --no-pager diff --name-only origin/${BASE} | grep ${FILE_USE_BASE} || true)
+          [[ ! -z "${OUT}" ]] && git checkout origin/${BASE} -- ${FILE_USE_BASE} && \
+            git commit -s -am "auto-merge use submodule in BASE ref"
+          git push origin ${INTERMEDIATE_HEAD} -f
+        env:
+          INTERMEDIATE_HEAD: bot-auto-merge-${{ env.HEAD }}
+          FILE_USE_BASE: README.md
 
       - name: auto-merge job
         uses: ./.github/workflows/action-helper
@@ -52,6 +56,6 @@ jobs:
         env:
           OWNER: pxLi
           REPO: pr-test
-          HEAD: auto-merge-${{ env.HEAD }}
+          HEAD: bot-auto-merge-${{ env.HEAD }}
           BASE: ${{ env.BASE }}
           TOKEN: ${{ secrets.AUTOMERGE_TOKEN }}
