@@ -41,13 +41,13 @@ jobs:
           git config user.email "abc@cba.com"
           git fetch origin ${HEAD} ${BASE}
           git checkout -b ${INTERMEDIATE_HEAD} origin/${HEAD}
-          OUT=$(git --no-pager diff --name-only origin/${BASE} | grep ${FILE_USE_BASE} || true)
+          OUT=$(git --no-pager diff --name-only origin/${BASE} | grep "${FILE_USE_BASE}" || true)
           [[ ! -z "${OUT}" ]] && git checkout origin/${BASE} -- ${FILE_USE_BASE} && \
             git commit -s -am "auto-merge use submodule in BASE ref"
           git push origin ${INTERMEDIATE_HEAD} -f
         env:
           INTERMEDIATE_HEAD: bot-auto-merge-${{ env.HEAD }}
-          FILE_USE_BASE: README.md
+          FILE_USE_BASE: thirdparty/cudf
 
       - name: auto-merge job
         uses: ./.github/workflows/action-helper
