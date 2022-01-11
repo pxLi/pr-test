@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 import sys
 from argparse import ArgumentParser
+from distutils.util import strtobool
 
 from utils import EnvDefault, PullRequest
 
 
 def main():
-    parser = ArgumentParser(description="Automerge")
+    parser = ArgumentParser(description="Submodule Sync")
     parser.add_argument("--owner", action=EnvDefault, env="OWNER",
                         help="github token, will try use env OWNER if empty")
     parser.add_argument("--repo", action=EnvDefault, env="REPO",
@@ -17,6 +18,12 @@ def main():
                         help="Base ref, will try use env BASE if empty")
     parser.add_argument("--token", action=EnvDefault, env="TOKEN",
                         help="github token, will try use env TOKEN if empty")
+    parser.add_argument("--sha", required=True,
+                        help="current HEAD commit SHA")
+    parser.add_argument("--cudf_sha", required=True,
+                        help="cudf commit SHA")
+    parser.add_argument("--passed", default=False, type=lambda x: bool(strtobool(x)), required=True,
+                        help="if the test passed")
     args = parser.parse_args()
 
     pr = PullRequest(head_owner=args.owner, head=args.head, head_token=args.token,
@@ -27,20 +34,25 @@ def main():
             sha = exist[0].get('head').get('sha')
         else:
             params = {
-                # head share the same owner/repo with base in auto-merge
-                'title': f"[auto-merge] {pr.head} to {pr.base} [skip ci] [bot]",
-                'head': f"{pr.head_owner}:{pr.head}",
-                'base': pr.base,
-                'body': f"auto-merge triggered by github actions on `{pr.head}` to "
-                        f"create a PR keeping `{pr.base}` up-to-date. "
-                        "If this PR is unable to be merged due to conflicts, "
-                        "it will remain open until manually fix.",
+                'title': f"[submodule-sync] {args.head} to {args.base} [skip ci] [bot]",
+                'head': f"{args.head_owner}:{args.head}",
+                'base': args.base,
+                'body': "submodule-sync to create a PR keeping thirdparty/cudf up-to-date.  "
+                        f"HEAD commit SHA: {args.sha}, CUDF commit SHA: {args.cudf_sha}  "
+                        "The scheduled sync pipeline gets triggered every 6 hours.  "
+                        "This PR will be auto-merged if test passed.  "
+                        "If failed, it will remain open until test pass or manually fix.",
                 'maintainer_can_modify': True
             }
             number, sha, term = pr.create(params)
-            if term:
+            if term:  # no change between HEAD and BASE
                 sys.exit(0)
-        pr.auto_merge(number, sha)
+
+        pr.comment(number, content=f"HEAD commit SHA: {args.sha}, CUDF commit SHA: {args.cudf_sha}  "
+                                   f"Test passed: {args.passed}")
+
+        if args.passed and args.sha == sha:
+            pr.auto_merge(number, sha)
     except Exception as e:
         print(e)
         sys.exit(1)
