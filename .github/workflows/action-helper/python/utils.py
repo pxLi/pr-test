@@ -66,19 +66,6 @@ class PullRequest:
         print(f'status code: {r.status_code}')
         raise Exception(f"Failed to create PR: {r.json()}")
 
-    def create_auto_merge(self):
-        """create an auto-merge pull request"""
-        params = {
-            # head share the same owner/repo with base in auto-merge
-            'title': f'[auto-merge] {self.head} to {self.base} [skip ci] [bot]',
-            'head': f"{self.head_owner}:{self.head}",
-            'base': self.base,
-            'body': f'auto-merge triggered by github actions on `{self.head}` to create a PR keeping `{self.base}` up-to-date. If '
-                    'this PR is unable to be merged due to conflicts, it will remain open until manually fix.',
-            'maintainer_can_modify': True
-        }
-        return self.create(params)
-
     def merge(self, number, params):
         """merge a pull request"""
         # the token here must have write access to base owner/repo
