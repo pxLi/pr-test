@@ -22,7 +22,7 @@ def main():
                         help="current HEAD commit SHA")
     parser.add_argument("--cudf_sha", required=True,
                         help="cudf commit SHA")
-    parser.add_argument("--passed", default=False, type=lambda x: bool(strtobool(x)), required=True,
+    parser.add_argument("--passed", default=False, type=lambda x: bool(strtobool(x)),
                         help="if the test passed")
     args = parser.parse_args()
 
@@ -34,13 +34,14 @@ def main():
             sha = exist[0].get('head').get('sha')
         else:
             params = {
-                'title': f"[submodule-sync] {args.head} to {args.base} [skip ci] [bot]",
-                'head': f"{args.head_owner}:{args.head}",
-                'base': args.base,
-                'body': "submodule-sync to create a PR keeping thirdparty/cudf up-to-date.  "
-                        f"HEAD commit SHA: {args.sha}, CUDF commit SHA: {args.cudf_sha}  "
-                        "The scheduled sync pipeline gets triggered every 6 hours.  "
-                        "This PR will be auto-merged if test passed.  "
+                'title': f"[submodule-sync] {pr.head} to {pr.base} [skip ci] [bot]",
+                'head': f"{pr.head_owner}:{pr.head}",
+                'base': pr.base,
+                'body': "submodule-sync to create a PR keeping thirdparty/cudf up-to-date.\n"
+                        f"HEAD commit SHA: {args.sha}, "
+                        f"cudf commit SHA: https://github.com/rapidsai/cudf/commit/{args.cudf_sha}\n\n"
+                        "The scheduled sync pipeline gets triggered every 6 hours.\n"
+                        "This PR will be auto-merged if test passed. "
                         "If failed, it will remain open until test pass or manually fix.",
                 'maintainer_can_modify': True
             }
@@ -48,7 +49,8 @@ def main():
             if term:  # no change between HEAD and BASE
                 sys.exit(0)
 
-        pr.comment(number, content=f"HEAD commit SHA: {args.sha}, CUDF commit SHA: {args.cudf_sha}  "
+        pr.comment(number, content=f"HEAD commit SHA: {args.sha}, "
+                                   f"CUDF commit SHA: https://github.com/rapidsai/cudf/commit/{args.cudf_sha}\n"
                                    f"Test passed: {args.passed}")
 
         if args.passed and args.sha == sha:
